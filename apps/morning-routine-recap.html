@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Morning Routine — Quick Recap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#15262E;
+    --body:#2C3D44;
+    --muted:#6A7B80;
+    --haze:#E7ECED;
+    --paper:#FCFBF9;
+    --line:#DCE2E2;
+    --sunrise:#E0743B;
+    --ember:#B5471B;
+    --wash:#FBEFE5;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;background:var(--haze);color:var(--body);
+    font-family:"Inter",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding:28px 18px;
+  }
+  .card{
+    max-width:760px;margin:0 auto;background:var(--paper);
+    border:1px solid var(--line);border-radius:8px;overflow:hidden;
+    box-shadow:0 22px 55px -38px rgba(14,27,34,.5);
+  }
+
+  /* header */
+  .head{
+    background:
+      radial-gradient(130% 130% at 88% -30%, rgba(224,116,59,.5), rgba(224,116,59,0) 58%),
+      linear-gradient(165deg,#0F242E,#163039);
+    color:#F3EEE7;padding:30px 34px 26px;
+  }
+  .eyebrow{font-size:11px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:var(--sunrise);margin:0 0 10px;}
+  .head h1{font-family:"Fraunces",serif;font-weight:600;font-size:30px;line-height:1.08;margin:0 0 8px;color:#FBF7F1;}
+  .head .mantra{font-family:"Fraunces",serif;font-size:17px;color:#CFD7D7;margin:0;}
+  .head .mantra b{color:var(--sunrise);font-weight:600;}
+
+  /* steps */
+  .steps{padding:14px 34px 6px;}
+  .step{display:flex;gap:18px;padding:18px 0;border-bottom:1px solid var(--line);}
+  .step:last-child{border-bottom:0;}
+  .num{
+    flex:none;width:38px;height:38px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--wash);border:1px solid #F1D9C7;
+    font-family:"Fraunces",serif;font-weight:600;font-size:18px;color:var(--ember);
+  }
+  .content{flex:1;}
+  .row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .title{font-family:"Fraunces",serif;font-weight:600;font-size:18px;color:var(--ink);margin:0;}
+  .time{flex:none;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ember);background:var(--wash);border:1px solid #F1D9C7;padding:3px 10px;border-radius:999px;}
+  .why{margin:5px 0 0;font-size:14.5px;line-height:1.5;color:var(--body);}
+  .why b{color:var(--ink);font-weight:600;}
+
+  /* rule footer */
+  .rule{
+    margin:0 34px;padding:16px 0 4px;border-top:2px solid var(--sunrise);
+  }
+  .rule .lab{font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--ember);margin:0 0 6px;}
+  .rule p{font-family:"Fraunces",serif;font-size:16px;line-height:1.45;color:var(--ink);margin:0;}
+  .foot{padding:14px 34px 26px;color:var(--muted);font-size:11px;letter-spacing:.04em;}
+
+  @media print{
+    body{background:#fff;padding:0;}
+    .card{border:0;box-shadow:none;max-width:none;}
+  }
+</style>
+</head>
+<body>
+<div class="card">
+
+  <header class="head">
+    <p class="eyebrow">10-Minute Morning Routine · Quick Recap</p>
+    <h1>Set your brain before the day sets it for you</h1>
+    <p class="mantra"><b>Light · Cold · Breathe · Write · Move</b> — in that order, before your phone, before coffee.</p>
+  </header>
+
+  <div class="steps">
+
+    <div class="step">
+      <div class="num">1</div>
+      <div class="content">
+        <div class="row">
+          <h2 class="title">Sunlight in your eyes</h2>
+          <span class="time">2 min</span>
+        </div>
+        <p class="why">Step outside (not through glass or sunglasses) and let natural light hit your eyes. <b>Anchors your circadian clock, triggers a sharp morning cortisol peak, and starts the night-time melatonin timer.</b> Cloudy day? Give it 5 minutes.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num">2</div>
+      <div class="content">
+        <div class="row">
+          <h2 class="title">Cold water on face &amp; neck</h2>
+          <span class="time">60–90 sec</span>
+        </div>
+        <p class="why">Cold tap water on your face, back of the neck, and wrists. <b>Surges norepinephrine and a slow-building dopamine</b> while the diving reflex keeps you calm — alert but not anxious.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num">3</div>
+      <div class="content">
+        <div class="row">
+          <h2 class="title">Deliberate breathwork</h2>
+          <span class="time">3 min</span>
+        </div>
+        <p class="why">Inhale 4 sec → hold 2 sec → exhale 6–8 sec, with the exhale longer than the inhale. <b>The long exhale fires the vagus nerve, lowering cortisol and quieting the amygdala</b> for hours.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num">4</div>
+      <div class="content">
+        <div class="row">
+          <h2 class="title">Written intention setting</h2>
+          <span class="time">2 min</span>
+        </div>
+        <p class="why">By hand, write three things: your single most important task, one thing you look forward to, one thing you appreciate. <b>Primes your brain's filter (RAS) and releases serotonin, oxytocin, and anticipatory dopamine.</b></p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num">5</div>
+      <div class="content">
+        <div class="row">
+          <h2 class="title">Full-body movement</h2>
+          <span class="time">60 sec</span>
+        </div>
+        <p class="why">One minute of anything intense — jumping jacks, squats, arm swings — to spike your heart rate. <b>Releases BDNF ("Miracle-Gro for the brain") and wakes the thinking brain.</b></p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="rule">
+    <p class="lab">The one rule</p>
+    <p>No phone, no social media, no email, no news — for the full 10 minutes, ideally 30. And wait 60–90 minutes for coffee. The sequence only works if you protect it.</p>
+  </div>
+
+  <p class="foot">Adapted from "10 Minute Morning Routine That Rewires Your Brain" · The Vital Core</p>
+
+</div>
+</body>
+</html>
