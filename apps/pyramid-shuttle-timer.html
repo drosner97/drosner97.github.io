@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- EDIT: app name -->
+  <title>Sample App</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --card: #ffffff;
+      --text: #1d1f23;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --border: #e5e7eb;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111317;
+        --card: #1b1e24;
+        --text: #f1f3f5;
+        --muted: #9aa3af;
+        --accent: #60a5fa;
+        --border: #2a2e36;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .wrap { max-width: 480px; margin: 0 auto; padding: 32px 16px; }
+    .back { color: var(--accent); text-decoration: none; font-size: .9rem; }
+    h1 { margin: 16px 0 4px; }
+    .sub { margin: 0 0 24px; color: var(--muted); }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    label { display: block; font-size: .9rem; margin: 12px 0 4px; color: var(--muted); }
+    input {
+      width: 100%;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .result {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.1rem;
+    }
+    .result strong { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- Back link to the home page (index.html one folder up) -->
+    <a class="back" href="../index.html">&larr; All apps</a>
+
+    <!-- EDIT: app name and description -->
+    <h1>Sample App</h1>
+    <p class="sub">Tip calculator — replace this with your own app.</p>
+
+    <!-- ===== APP CONTENT (replace everything in this panel) ===== -->
+    <div class="panel">
+      <label for="bill">Bill amount ($)</label>
+      <input id="bill" type="number" min="0" step="0.01" value="50">
+
+      <label for="tip">Tip (%)</label>
+      <input id="tip" type="number" min="0" step="1" value="20">
+
+      <label for="people">Split between</label>
+      <input id="people" type="number" min="1" step="1" value="1">
+
+      <div class="result"><span>Tip</span><strong id="tipOut">$0.00</strong></div>
+      <div class="result"><span>Total per person</span><strong id="totalOut">$0.00</strong></div>
+    </div>
+  </div>
+
+  <script>
+    // ===== APP LOGIC (replace with your own) =====
+    const $ = id => document.getElementById(id);
+    const fmt = n => "$" + n.toFixed(2);
+
+    function calc() {
+      const bill = parseFloat($("bill").value) || 0;
+      const tipPct = parseFloat($("tip").value) || 0;
+      const people = Math.max(1, parseInt($("people").value) || 1);
+      const tip = bill * tipPct / 100;
+      $("tipOut").textContent = fmt(tip);
+      $("totalOut").textContent = fmt((bill + tip) / people);
+    }
+
+    ["bill", "tip", "people"].forEach(id => $(id).addEventListener("input", calc));
+    calc();
+  </script>
+</body>
+</html>
