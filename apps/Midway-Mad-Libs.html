@@ -1,0 +1,837 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Midway Mad Libs</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: striped midway awning on top, one centered column (~680px) that swaps between story shelf, fill-in form, and the finished story */
+:root {
+  --bg: #F2F4FA;
+  --card: #FFFFFF;
+  --ink: #1E1B3A;
+  --muted: #5E5A7D;
+  --line: #D9DBEA;
+  --red: #D7263D;
+  --red-ink: #FFFFFF;
+  --gold: #F2B33D;
+  --gold-soft: #FCE7B8;
+  --plum: #6B2FB3;
+  --stripe-a: #D7263D;
+  --stripe-b: #FFFFFF;
+  --font-display: "Bungee", "Impact", "Arial Black", sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15132A; --card: #221F3F; --ink: #F1EEFF; --muted: #ADA8D0; --line: #3A3661;
+    --red: #FF5A6E; --red-ink: #1A0A10; --gold: #F5C15A; --gold-soft: #4A3A16; --plum: #B48CF5;
+    --stripe-a: #C91F35; --stripe-b: #2C2850; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15132A; --card: #221F3F; --ink: #F1EEFF; --muted: #ADA8D0; --line: #3A3661;
+  --red: #FF5A6E; --red-ink: #1A0A10; --gold: #F5C15A; --gold-soft: #4A3A16; --plum: #B48CF5;
+  --stripe-a: #C91F35; --stripe-b: #2C2850; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.55; }
+/* Night-sky banner: always dark by design, so its colors live in the SVG */
+.awning { display: block; width: 100%; height: 96px; background: #0B0612; }
+.shelf-group { display: grid; gap: 12px; }
+.shelf-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 8px 0 0; font-family: var(--font-display); font-weight: 400; font-size: 1.15rem; color: var(--ink); }
+.shelf-head span { font-family: var(--font-body); font-size: .8rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.wrap { max-width: 680px; margin: 0 auto; padding-block: 24px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 24px; }
+header h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(2rem, 7vw, 3rem); line-height: 1.05; margin: 0; color: var(--red); text-wrap: balance; }
+header p { margin: 6px 0 0; color: var(--muted); }
+h2 { font-family: var(--font-display); font-weight: 400; font-size: 1.5rem; line-height: 1.15; margin: 0; text-wrap: balance; }
+.eyebrow { font-size: .78rem; text-transform: uppercase; letter-spacing: .12em; font-weight: 700; color: var(--plum); }
+
+/* Story shelf: each story is an admission ticket */
+.shelf { display: grid; gap: 28px; }
+.ticket {
+  display: grid; grid-template-columns: 1fr auto; gap: 0; text-align: left; width: 100%;
+  background: var(--card); color: var(--ink); border: 2px solid var(--ink); border-radius: 10px; padding: 0; cursor: pointer; font: inherit;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.ticket:hover { transform: translateY(-2px); box-shadow: 0 6px 0 var(--ink); }
+.ticket:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.ticket .main { padding: 18px 20px; display: grid; gap: 6px; min-width: 0; }
+.ticket .main p { margin: 0; color: var(--muted); }
+.ticket .stub { border-left: 2px dashed var(--ink); padding: 18px 20px; display: grid; place-items: center; font-family: var(--font-display); color: var(--red); text-align: center; line-height: 1.1; }
+.ticket .stub small { display: block; font-family: var(--font-body); font-weight: 700; color: var(--muted); font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; margin-top: 4px; }
+.soon { color: var(--muted); font-size: .95rem; margin: 0; }
+
+/* Panels */
+.panel { background: var(--card); border: 2px solid var(--ink); border-radius: 12px; padding: 22px; display: grid; gap: 18px; }
+.panel-head { display: grid; gap: 4px; }
+.panel-head p { margin: 0; color: var(--muted); }
+.progress { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.progress > span { display: block; height: 100%; width: 0; background: var(--plum); transition: width .2s ease; }
+.progress-label { font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; }
+@media (max-width: 520px) { .fields { grid-template-columns: 1fr; } }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field label { font-weight: 700; font-size: .95rem; }
+.field label .n { color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; margin-right: 4px; }
+.field input {
+  font: inherit; font-size: 1rem; padding: 10px 12px; border-radius: 8px; border: 2px solid var(--line);
+  background: var(--bg); color: var(--ink); width: 100%; min-width: 0;
+}
+.field input:focus { outline: none; border-color: var(--plum); }
+.field.missing input { border-color: var(--red); }
+
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.btn {
+  font: inherit; font-weight: 700; font-size: 1rem; padding: 11px 18px; border-radius: 8px; cursor: pointer;
+  border: 2px solid var(--ink); background: var(--card); color: var(--ink);
+}
+.btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.btn:disabled { opacity: .55; cursor: progress; }
+.btn.primary { background: var(--red); border-color: var(--red); color: var(--red-ink); font-family: var(--font-display); font-weight: 400; letter-spacing: .02em; }
+.btn.link { border-color: transparent; background: none; color: var(--muted); padding-inline: 6px; text-decoration: underline; }
+.error { color: var(--red); font-weight: 700; margin: 0; font-size: .95rem; }
+
+/* Finished story */
+.story h2 { color: var(--red); }
+.story-text { display: grid; gap: 14px; font-size: 1.12rem; line-height: 1.7; max-width: 65ch; }
+.story-text p { margin: 0; padding-left: 12px; border-left: 4px solid transparent; transition: border-color .2s ease; }
+.story-text p.reading { border-left-color: var(--plum); }
+.listen { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.listen select { font: inherit; font-size: .9rem; padding: 9px 10px; border-radius: 8px; border: 2px solid var(--line); background: var(--bg); color: var(--ink); max-width: 100%; min-width: 0; }
+.btn.speak { background: var(--plum); border-color: var(--plum); color: var(--card); }
+.w {
+  font-weight: 700; padding: 0 4px; border-radius: 4px;
+  background: var(--gold-soft); box-shadow: inset 0 -3px 0 var(--gold);
+  animation: pop .35s ease both;
+}
+@keyframes pop { from { background: var(--gold); } }
+.keep { display: grid; gap: 10px; border-top: 2px dashed var(--line); padding-top: 16px; }
+.toast { font-size: .9rem; color: var(--plum); font-weight: 700; margin: 0; min-height: 1.4em; }
+@media (prefers-reduced-motion: reduce) { .ticket, .progress > span { transition: none; } .w { animation: none; } }
+@media print {
+  .awning, header, .actions, .keep, .listen, #view-shelf, #view-form { display: none !important; }
+  body { background: #fff; color: #000; }
+  .panel { border: none; padding: 0; }
+  .w { background: none; box-shadow: none; text-decoration: underline; }
+}
+</style>
+
+<svg class="awning" aria-hidden="true" viewBox="0 0 1200 96" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0B0612"/><stop offset=".55" stop-color="#2A0F4A"/><stop offset="1" stop-color="#5B2499"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#C9A6FF" stop-opacity=".45"/><stop offset="1" stop-color="#C9A6FF" stop-opacity="0"/>
+    </radialGradient>
+    <symbol id="bat" viewBox="0 0 40 16">
+      <path d="M20 4c1-2 2-3 2-3l1 3c4-3 10-4 17-2-4 1-6 4-6 8-3-3-6-3-8 0-1-2-3-3-6-3s-5 1-6 3c-2-3-5-3-8 0 0-4-2-7-6-8 7-2 13-1 17 2l1-3s1 1 2 3z" fill="#07030C"/>
+    </symbol>
+  </defs>
+  <rect width="1200" height="96" fill="url(#sky)"/>
+  <g fill="#E9DDFF" opacity=".8">
+    <circle cx="140" cy="18" r="1.3"/><circle cx="260" cy="38" r="1"/><circle cx="380" cy="14" r="1.4"/><circle cx="470" cy="44" r="1"/>
+    <circle cx="560" cy="20" r="1.2"/><circle cx="830" cy="16" r="1.3"/><circle cx="900" cy="46" r="1"/><circle cx="1010" cy="24" r="1.4"/><circle cx="1110" cy="12" r="1"/>
+  </g>
+  <circle cx="700" cy="36" r="46" fill="url(#glow)"/>
+  <circle cx="700" cy="36" r="21" fill="#F1E8FF"/>
+  <circle cx="692" cy="31" r="4" fill="#D8C6F5"/><circle cx="708" cy="42" r="3" fill="#D8C6F5"/>
+  <use href="#bat" x="610" y="14" width="34" height="14"/>
+  <use href="#bat" x="745" y="24" width="24" height="10"/>
+  <use href="#bat" x="520" y="34" width="20" height="8"/>
+  <use href="#bat" x="300" y="22" width="26" height="11"/>
+  <use href="#bat" x="960" y="34" width="22" height="9"/>
+  <path d="M0 96V78Q150 62 300 76T600 72T900 78T1200 70V96Z" fill="#07030C"/>
+  <g fill="#07030C">
+    <path d="M520 80v-14a7 7 0 0 1 14 0v14z"/><path d="M548 80v-10a5 5 0 0 1 10 0v10z"/>
+    <path d="M790 80v-12h-6v-4h6v-5h4v5h6v4h-6v12z"/><path d="M818 80v-12a6 6 0 0 1 12 0v12z"/>
+  </g>
+  <path d="M440 78V52M440 60l-12-10M440 56l10-12M450 44l6-4M428 50l-6 2" stroke="#07030C" stroke-width="3" stroke-linecap="round" fill="none"/>
+</svg>
+<main class="wrap">
+  <header>
+    <div class="eyebrow">Fill in the blanks · Read it out loud</div>
+    <h1>Midway Mad Libs</h1>
+    <p>Pick a story, fill in the words without peeking, then read your masterpiece.</p>
+  </header>
+
+  <section id="view-shelf" class="shelf" aria-label="Choose a story"></section>
+
+  <section id="view-form" class="panel" hidden>
+    <div class="panel-head">
+      <div class="eyebrow" id="form-eyebrow"></div>
+      <h2 id="form-title"></h2>
+      <p>No peeking at the story. Just fill in each word.</p>
+    </div>
+    <div>
+      <div class="progress"><span id="progress-bar"></span></div>
+      <div class="progress-label" id="progress-label"></div>
+    </div>
+    <form id="word-form" novalidate>
+      <div class="fields" id="fields"></div>
+    </form>
+    <p class="error" id="form-error" hidden></p>
+    <div class="actions">
+      <button class="btn primary" id="btn-make" type="button">Make My Mad Lib</button>
+      <button class="btn" id="btn-random" type="button">Fill with random words</button>
+      <button class="btn link" id="btn-back" type="button">Pick another story</button>
+    </div>
+  </section>
+
+  <section id="view-story" class="panel story" hidden>
+    <div class="panel-head">
+      <div class="eyebrow">Your Mad Lib</div>
+      <h2 id="story-title"></h2>
+    </div>
+    <div class="listen" id="listen" hidden>
+      <button class="btn speak" id="btn-read" type="button">&#9654; Read it to me</button>
+      <button class="btn" id="btn-stop" type="button" hidden>&#9632; Stop</button>
+      <select id="voice" aria-label="Voice"></select>
+    </div>
+    <div class="story-text" id="story-text"></div>
+    <div class="actions">
+      <button class="btn primary" id="btn-again" type="button">Play again</button>
+      <button class="btn" id="btn-edit" type="button">Change my words</button>
+      <button class="btn link" id="btn-shelf" type="button">Pick another story</button>
+    </div>
+    <div class="keep">
+      <div class="eyebrow">Keep it</div>
+      <div class="actions">
+        <button class="btn" id="btn-pdf" type="button">Save PDF</button>
+        <button class="btn" id="btn-photo" type="button">Save photo</button>
+        <button class="btn" id="btn-print" type="button">Print</button>
+        <button class="btn" id="btn-copy" type="button">Copy text</button>
+      </div>
+      <p class="toast" id="toast" role="status"></p>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+/* ---- Word types: label, hint, and a word bank for "random" ---- */
+const TYPES = {
+  boyName:   { label: "Boy's name", hint: "e.g. Marcus", bank: ["Marcus","Leo","Jaxon","Ollie","Theo","Benny","Diego","Finn"] },
+  kidName:   { label: "Kid's name", hint: "e.g. Riley", bank: ["Riley","Sam","Jordan","Max","Charlie","Frankie","Kai","Rosie"] },
+  name:      { label: "Friend's name", hint: "Anyone you know", bank: ["Priya","Zeke","Maya","Tank","Lulu","Grandpa Joe","Coach Ray","Ava"] },
+  relative:  { label: "Family member", hint: "e.g. Uncle Dave", bank: ["Uncle Dave","Grandma","Aunt Tina","Dad","Mom","Cousin Earl","Grandpa"] },
+  adjective: { label: "Adjective", hint: "Describes a thing: sticky, huge", bank: ["sticky","gigantic","sparkly","grumpy","soggy","fancy","wobbly","stinky","majestic"] },
+  food:      { label: "Food", hint: "Singular: pickle, taco", bank: ["pickle","taco","broccoli","meatball","cheese","jelly bean","sardine","waffle"] },
+  pluralNoun:{ label: "Plural noun", hint: "More than one: socks", bank: ["socks","tubas","toenails","balloons","pencils","flip-flops","doorknobs"] },
+  number:    { label: "Number", hint: "Any number", bank: ["7","12","42","99","300","1,000"] },
+  vegetable: { label: "Vegetable", hint: "e.g. zucchini", bank: ["zucchini","cucumber","pea","lettuce","celery stalk","lime-flavored pickle"] },
+  animal:    { label: "Animal", hint: "e.g. llama", bank: ["llama","goat","pig","alpaca","turkey","cow","rooster"] },
+  celebrity: { label: "Famous person", hint: "Real or fictional", bank: ["Taylor Swift","Abraham Lincoln","Elvis","Shakespeare","Lionel Messi","Albert Einstein"] },
+  verbIng:   { label: "Verb ending in -ing", hint: "e.g. dancing", bank: ["dancing","yodeling","snoring","juggling","moonwalking","sneezing"] },
+  bodyPart:  { label: "Body part", hint: "e.g. elbow", bank: ["elbow","eyebrow","nostril","kneecap","earlobe","forehead"] },
+  adverb:    { label: "Adverb", hint: "Ends in -ly: wildly", bank: ["wildly","sneakily","gracefully","angrily","clumsily","heroically"] },
+  color:     { label: "Color", hint: "e.g. neon green", bank: ["neon green","hot pink","purple","polka-dot","plaid","glow-in-the-dark orange"] },
+  noun:      { label: "Noun", hint: "A thing: toaster", bank: ["toaster","walrus","unicorn","banana","trombone","burrito"] },
+  exclamation:{ label: "Exclamation", hint: "e.g. Holy guacamole", bank: ["Holy guacamole","Yowza","Great googly moogly","Ka-boom","Oh, fiddlesticks"] },
+  sound:     { label: "Silly sound", hint: "e.g. blorp", bank: ["blorp","sploosh","hrrnngh","wubba wubba","glurk","pfffft"] },
+  sillyWord: { label: "Silly word", hint: "Make one up: Wobbleton", bank: ["Wobbleton","Snickerdoodle","Kerplunk","Gloopy Pines","Bumblesnort"] },
+  liquid:    { label: "Liquid", hint: "e.g. orange juice", bank: ["orange juice","pudding","maple syrup","chocolate milk","pickle juice","gravy"] },
+  monster:   { label: "Monster", hint: "e.g. werewolf", bank: ["zombie","vampire","werewolf","mummy","swamp creature","goblin","troll"] },
+  place:     { label: "A place", hint: "e.g. Antarctica", bank: ["Antarctica","the moon","Grandma's house","Canada","the school cafeteria","Las Vegas"] },
+  verbPast:  { label: "Verb, past tense", hint: "e.g. skipped", bank: ["skipped","hopped","cartwheeled","tiptoed","waddled","galloped"] }
+};
+
+/* ---- Stories: add more objects here. Text uses {key}; each key maps to a word type. ---- */
+const COLLECTIONS = ["Halloween", "Everyday Adventures"];
+const STORIES = [
+  /* ===== Halloween ===== */
+  {
+    id: "haunted-outhouse", collection: "Halloween",
+    title: "The Haunted Outhouse",
+    blurb: "Something has lived in Grandpa’s outhouse for years. Tonight, somebody has to go in.",
+    blanks: {
+      place: "place", adj1: "adjective", num: "number", monster: "monster", hero: "kidName", friend: "name",
+      adverb: "adverb", color: "color", sound: "sound", plural: "pluralNoun", verbIng: "verbIng", excl: "exclamation",
+      body: "bodyPart", food: "food", adj2: "adjective", celeb: "celebrity", verbPast: "verbPast", noun: "noun"
+    },
+    paragraphs: [
+      "Out behind Grandpa’s cabin near {place} stood an old wooden outhouse that everyone called the {adj1} Throne. Legend said that {num} years ago, a {monster} went in there to read the newspaper and never came out.",
+      "On Halloween night, {hero} dared {friend} to use it. {friend} tiptoed {adverb} up the path, holding a flashlight and a roll of {color} toilet paper. The door creaked open with a loud “{sound}.”",
+      "Inside, the walls were covered in {plural}, and from deep down in the hole came the sound of someone {verbIng}. “{excl}!” {friend} screamed, and ran so fast that one shoe flew off and hit {hero} right on the {body}.",
+      "{hero} grabbed the flashlight and peeked into the hole. Two glowing eyes blinked back. Then a voice said, “Do you have any {food}? I’ve been down here a really long time.”",
+      "It was the {monster}. It was {adj2}, lonely, and a huge fan of {celeb}. {hero} dropped down a granola bar, and the {monster} was so happy that it {verbPast} around in circles.",
+      "Now every Halloween, {hero} and {friend} leave a snack and a {noun} outside the outhouse door. And nobody, absolutely nobody, uses that bathroom anymore."
+    ]
+  },
+  {
+    id: "mystery-mineshaft", collection: "Halloween",
+    title: "The Mystery Mineshaft",
+    blurb: "An abandoned mine, a nervous family member, and a ghost who is very protective of his rocks.",
+    blanks: {
+      silly: "sillyWord", num: "number", hero: "kidName", rel: "relative", adj1: "adjective", food: "food",
+      liquid: "liquid", sound: "sound", animal: "animal", verbIng: "verbIng", color: "color", plural: "pluralNoun",
+      excl: "exclamation", body: "bodyPart", noun: "noun", adverb: "adverb", verbPast: "verbPast", adj2: "adjective"
+    },
+    paragraphs: [
+      "High in the hills above the ghost town of {silly} Gulch, there is an old mineshaft that the miners abandoned {num} years ago. The sign at the entrance reads: KEEP OUT. SERIOUSLY. WE MEAN IT. So of course {hero} and {rel} went in.",
+      "They brought a {adj1} lantern, a bag of {food}, and a pickaxe that {rel} had bought at a yard sale. Ten steps into the dark, the tunnel walls started dripping {liquid}.",
+      "Then they heard it, echoing up from the deep: “{sound}… {sound}…” A {animal} wearing a tiny miner’s helmet scurried past them, {verbIng} as fast as it could. That is never a good sign.",
+      "At the very bottom they found a cart piled high with glittering {color} {plural}. “We’re rich!” {rel} shouted. “{excl}!” shouted the ghost of an old miner, who popped out of the cart and bonked {rel} on the {body} with a {noun}.",
+      "“That’s my treasure,” the ghost said {adverb}. {hero} offered a trade: the whole bag of {food} for one shiny rock. The ghost thought about it, then said yes. Ghosts get very hungry.",
+      "{hero} and {rel} {verbPast} all the way back to the surface. The shiny rock turned out to be a {adj2} old piece of bubble gum. They kept it anyway."
+    ]
+  },
+  {
+    id: "outer-space", collection: "Halloween",
+    title: "It Came from Outer Space",
+    blurb: "A spaceship lands in the middle of trick-or-treating, and the alien wants your candy.",
+    blanks: {
+      hero: "kidName", friend: "name", adj1: "adjective", plural: "pluralNoun", color: "color", sound: "sound",
+      num: "number", noun: "noun", celeb: "celebrity", body: "bodyPart", excl: "exclamation", food: "food",
+      verbIng: "verbIng", adverb: "adverb", adj2: "adjective", noun2: "noun", place: "place", verbPast: "verbPast"
+    },
+    paragraphs: [
+      "It was Halloween night, and {hero} and {friend} were trick-or-treating dressed as a pair of {adj1} {plural}. Just as they reached the last house on the street, a giant {color} spaceship landed right in the middle of the cul-de-sac.",
+      "The door opened with a “{sound}!” Out stepped an alien with {num} eyes, three arms, and a {noun} on its head. It pointed a glowing finger straight at {hero}’s candy bag.",
+      "“Take me to your leader,” it said. {friend} pointed at the house, where {celeb} was handing out full-size candy bars. Nobody knows why {celeb} lives on that street, but it’s true.",
+      "The alien tried one piece of candy, and its whole {body} turned purple. “{excl}!” it cried. “On my planet, all the candy tastes like {food}!” Then it started {verbIng} with joy right there in the street.",
+      "The alien {adverb} loaded every candy bar in the neighborhood into its spaceship. Before it left, it handed {hero} a {adj2} {noun2} as a thank-you gift.",
+      "The spaceship blasted off toward {place}. {hero} and {friend} {verbPast} home with empty bags and a great story. Nobody at school believed them. Except {celeb}."
+    ]
+  },
+  {
+    id: "the-finger", collection: "Halloween",
+    title: "The Finger",
+    blurb: "A wiggling finger turns up in the fridge, and it wants to go somewhere.",
+    blanks: {
+      hero: "kidName", adj1: "adjective", food: "food", color: "color", excl: "exclamation", num: "number",
+      rel: "relative", place: "place", verbIng: "verbIng", noun: "noun", sound: "sound", adj2: "adjective",
+      body: "bodyPart", celeb: "celebrity", liquid: "liquid", adverb: "adverb", verbPast: "verbPast"
+    },
+    paragraphs: [
+      "On the night before Halloween, {hero} was digging through the back of the fridge for a snack when something {adj1} rolled out from behind the {food}. It was a finger. A long, {color}, wiggling finger.",
+      "“{excl}!” {hero} yelled, and dropped it on the floor. The finger did not seem to mind. It hopped up, tapped {num} times on the tile, and pointed straight at the back door.",
+      "{hero} woke up {rel}, and together they followed the finger outside, across the yard, and all the way to {place}. The finger kept {verbIng} the whole time, which was honestly a little rude.",
+      "At last it stopped beside an old {noun} and made a sound like “{sound}.” Out from behind it shuffled a {adj2} mummy, holding up one hand. That hand was missing a finger.",
+      "The mummy explained that it had lost the finger scratching its {body} at a Halloween party hosted by {celeb}. {rel} found a bottle of {liquid} and some tape and {adverb} stuck the finger back on.",
+      "The mummy was so grateful that it gave them both a big thumbs-up. Then the thumb fell off. {hero} and {rel} {verbPast} home without saying a word."
+    ]
+  },
+  {
+    id: "graveyard-of-doom", collection: "Halloween",
+    title: "The Graveyard of Doom",
+    blurb: "Three friends sneak into the graveyard at midnight and find out what really goes on there.",
+    blanks: {
+      adj1: "adjective", hero: "kidName", friendA: "name", friendB: "name", celeb: "celebrity", num: "number",
+      food: "food", sound: "sound", plural: "pluralNoun", color: "color", monster: "monster", excl: "exclamation",
+      verbIng: "verbIng", noun: "noun", adverb: "adverb", body: "bodyPart", verbPast: "verbPast", adj2: "adjective"
+    },
+    paragraphs: [
+      "Everyone in town knew the rule: never enter the {adj1} Graveyard of Doom after dark. So at 11:59 on Halloween night, {hero}, {friendA}, and {friendB} climbed over the gate.",
+      "The tombstones had strange words carved into them, like “Here lies {celeb}, who ate {num} pounds of {food}.” Mist curled around their ankles, and somewhere an owl went “{sound}.”",
+      "At midnight the ground began to rumble. One by one, {plural} popped up out of the graves, followed by a {color} {monster} wearing a party hat. “{excl}!” whispered {friendA}.",
+      "But the monsters weren’t scary at all. They were {verbIng}! It turned out the Graveyard of Doom throws the biggest dance party of the year, and nobody living had ever been invited.",
+      "{friendB} taught the {monster} how to do the floss. {hero} tried a dance move called the {noun}, slipped on some moss, and landed {adverb} on one {body}.",
+      "At sunrise the monsters climbed back into their graves. “Same time next year?” asked the {monster}. The three friends {verbPast} home, {adj2} and exhausted, and slept until dinner."
+    ]
+  },
+  {
+    id: "smelly-socks", collection: "Halloween",
+    title: "The Smelly Socks of Horror",
+    blurb: "Some socks get worn way too long. These ones got up and walked away.",
+    blanks: {
+      hero: "kidName", color: "color", num: "number", adj1: "adjective", food: "food", liquid: "liquid",
+      animal: "animal", verbPast: "verbPast", excl: "exclamation", rel: "relative", sound: "sound", body: "bodyPart",
+      place: "place", verbIng: "verbIng", noun: "noun", adverb: "adverb", adj2: "adjective", celeb: "celebrity"
+    },
+    paragraphs: [
+      "{hero} had worn the same pair of {color} socks for {num} days straight. They were lucky socks. They were also the most {adj1} socks in the history of the world.",
+      "They smelled like {food} soaked in {liquid}. When {hero} finally pulled them off on Halloween night, the curtains wilted, the goldfish fainted, and a passing {animal} {verbPast} away screaming.",
+      "Then, at the stroke of midnight, the socks stood up on their own. “{excl}!” gasped {rel}. The socks shuffled across the floor, going “{sound}” with every squishy step.",
+      "They marched out the front door and down the street. Everywhere they went, jack-o’-lanterns blew out and trick-or-treaters ran for cover. Even a vampire covered its {body} and flew away.",
+      "{hero} and {rel} chased the socks all the way to {place}, where they found them {verbIng} on top of a {noun}. {rel} {adverb} scooped them up with a pair of barbecue tongs.",
+      "The next day they buried the socks in the backyard. A {adj2} plant grew in that spot, and it smells exactly like {celeb}’s gym bag. Nobody goes near it."
+    ]
+  },
+  {
+    id: "the-sandwitch", collection: "Halloween",
+    title: "The Sandwitch",
+    blurb: "The witch in the cafeteria freezer is made of bread. And she’s hungry.",
+    blanks: {
+      food1: "food", food2: "food", hero: "kidName", friend: "name", color: "color", liquid: "liquid",
+      sound: "sound", num: "number", adj1: "adjective", excl: "exclamation", animal: "animal", body: "bodyPart",
+      adverb: "adverb", verbIng: "verbIng", adj2: "adjective", noun: "noun", verbPast: "verbPast", celeb: "celebrity"
+    },
+    paragraphs: [
+      "Every kid at Maple Street School had heard about the Sandwitch, a witch made entirely of bread, {food1}, and extra {food2}. She lived in the back of the cafeteria freezer and only came out on Halloween.",
+      "{hero} didn’t believe in her. So at lunch on October 31, {hero} and {friend} snuck into the kitchen. The freezer door was dripping with {color} {liquid}.",
+      "Suddenly the door burst open with a “{sound}!” Out stepped the Sandwitch, {num} feet tall, with lettuce hair, pickle eyes, and a very {adj1} crust. She cackled, “Who wants to be my side dish?”",
+      "“{excl}!” yelled {friend}. The Sandwitch waved her breadstick wand and turned the lunch lady’s pet {animal} into a meatball. Then she pointed the wand right at {hero}’s {body}.",
+      "Thinking fast, {hero} grabbed a bottle of mustard and squirted it {adverb}. The Sandwitch started {verbIng}. “Not mustard! I’m a mayo witch!” she shrieked, and she shrank down into a plain, {adj2} {noun}.",
+      "{hero} and {friend} {verbPast} out of the kitchen and never told a soul. But ever since that day, the cafeteria’s {food1} sandwiches have tasted a little bit like {celeb}."
+    ]
+  },
+  {
+    id: "late-night-screening", collection: "Halloween",
+    title: "The Late Night Screening",
+    blurb: "A midnight horror movie that nobody has ever stayed to the end of.",
+    blanks: {
+      adj1: "adjective", silly: "sillyWord", num: "number", hero: "kidName", friend: "name", rel: "relative",
+      food: "food", liquid: "liquid", color: "color", monster: "monster", excl: "exclamation", sound: "sound",
+      celeb: "celebrity", adverb: "adverb", verbIng: "verbIng", verbPast: "verbPast", adj2: "adjective", noun: "noun", body: "bodyPart"
+    },
+    paragraphs: [
+      "The {adj1} Old Theater was showing a movie called Attack of the {silly} at midnight on Halloween. The poster said only {num} people had ever made it to the end.",
+      "{hero}, {friend}, and {rel} bought a bucket of {food}-flavored popcorn and a giant cup of {liquid}, then sat in the front row. The theater was empty except for one person in the very back, wearing a {color} cape.",
+      "The movie started. A {monster} crept across the screen, getting closer, and closer, and closer, until it climbed right out of the screen and sat down next to {hero}.",
+      "“{excl}!” yelled {rel}, throwing popcorn everywhere. The {monster} just said “{sound}” and grabbed a handful. It turns out monsters love movies too. They just never get to see the ending.",
+      "Halfway through, the person in the cape stood up. It was {celeb}! “Shhh,” said {celeb}, {adverb} pointing to a sign on the wall: No {verbIng} During the Film.",
+      "When the credits rolled, the {monster} high-fived everyone, climbed back into the screen, and {verbPast} away. The next morning, {hero} found a {adj2} {noun} stuck to {friend}’s {body}, and nobody can explain how it got there."
+    ]
+  },
+  {
+    id: "screams-from-the-woods", collection: "Halloween",
+    title: "The Screams from the Woods",
+    blurb: "Something in the woods won’t stop screaming. Time to find out what.",
+    blanks: {
+      num: "number", place: "place", sound: "sound", hero: "kidName", rel: "relative", adj1: "adjective",
+      food: "food", color: "color", plural: "pluralNoun", verbIng: "verbIng", excl: "exclamation", noun: "noun",
+      animal: "animal", adverb: "adverb", celeb: "celebrity", body: "bodyPart", adj2: "adjective", verbPast: "verbPast"
+    },
+    paragraphs: [
+      "For {num} nights in a row, the people of {place} heard terrible screams coming from the woods. “{sound}!” the screams went. “{sound}!” Nobody could sleep. Even the dogs wore earmuffs.",
+      "On Halloween, {hero} and {rel} decided to find out what was making all that noise. They packed a flashlight, a {adj1} butterfly net, and a sandwich made of {food}.",
+      "Deep in the woods, the trees were covered in {color} {plural}, and the screams got louder. Then they saw it: a shadow as tall as a house, {verbIng} back and forth between the trees.",
+      "“{excl}!” whispered {rel}, ducking behind a {noun}. {hero} crept closer and pointed the flashlight. It wasn’t a monster at all. It was a tiny {animal}, holding a microphone plugged into a giant speaker.",
+      "“I’m practicing for a singing contest,” the {animal} said {adverb}. “My hero is {celeb}.” Then it sang one more note, so loud that {rel}’s {body} started to buzz.",
+      "{hero} taught the {animal} how to sing a little more quietly, and the whole town finally got some sleep. The {animal} won the contest with a {adj2} song about {food}, and everyone {verbPast} home happy."
+    ]
+  },
+  {
+    id: "mad-mustache", collection: "Halloween",
+    title: "The Mad Mustache",
+    blurb: "Never wear the costume-shop mustache after midnight. Never.",
+    blanks: {
+      hero: "kidName", color: "color", adj1: "adjective", num: "number", sound: "sound", rel: "relative",
+      body: "bodyPart", place: "place", food: "food", plural: "pluralNoun", animal: "animal", excl: "exclamation",
+      celeb: "celebrity", verbIng: "verbIng", adverb: "adverb", noun: "noun", adj2: "adjective", verbPast: "verbPast"
+    },
+    paragraphs: [
+      "{hero} found a fake mustache at the costume shop on Halloween. It was {color}, very {adj1}, and the tag said DO NOT WEAR AFTER MIDNIGHT. It only cost {num} cents. What a deal.",
+      "At 12:01 a.m., {hero} put it on. Instantly the mustache began to twitch. Then it shouted “{sound}!”, leaped off {hero}’s face, and landed on {rel}’s {body}.",
+      "{rel} suddenly spoke in a fancy accent and announced, “I am now the greatest chef in all of {place}!” Then {rel} cooked a pot of {food} soup with {plural} on top and served it to the {animal} next door.",
+      "“{excl}!” cried {hero}. The mustache jumped again, this time onto the statue of {celeb} in the town square, which climbed off its pedestal and went {verbIng} down Main Street.",
+      "{hero} chased it {adverb} all night long, from the barber shop to the bakery to the top of a {noun}. Finally, just before sunrise, {hero} trapped the mustache under a cereal bowl.",
+      "Now it lives in a jar on {hero}’s dresser. Every Halloween it wiggles and whispers, “Let me out.” {hero} just says no, eats a {adj2} cookie, and {verbPast} off to bed."
+    ]
+  },
+
+  /* ===== Everyday Adventures ===== */
+  {
+    id: "county-fair", collection: "Everyday Adventures",
+    title: "The Day at the County Fair",
+    blurb: "A kid and his two best friends hit the fair. Rides, a very friendly animal, and one pie-eating contest.",
+    blanks: {
+      hero: "boyName", friendA: "name", friendB: "name", adj1: "adjective", food: "food",
+      plural: "pluralNoun", num: "number", veg: "vegetable", animal: "animal", celeb: "celebrity",
+      verbIng: "verbIng", body: "bodyPart", adverb: "adverb", adj2: "adjective", color: "color",
+      noun: "noun", excl: "exclamation", sound: "sound", adj3: "adjective", place: "place", verbPast: "verbPast"
+    },
+    paragraphs: [
+      "On the first Saturday of summer, {hero} met {friendA} and {friendB} at the gates of the {adj1} County Fair. The air smelled like fried {food} and {plural}, and {hero} had twenty dollars burning a hole in his pocket.",
+      "First stop: the Tilt-A-Whirl. {friendA} rode it {num} times in a row and climbed off looking greener than a {veg}. “Never again,” {friendA} groaned, then got right back in line.",
+      "Next they wandered into the livestock barn, where a prize-winning {animal} named Sir {celeb} was {verbIng} in its pen. When {hero} leaned in for a selfie, it licked him right on the {body}. {friendB} laughed so hard that lemonade came out of {friendB}’s nose.",
+      "At the ring toss, {hero} threw {adverb} and won a {adj2}, {color} stuffed {noun} the size of a refrigerator. Carrying it through the crowd, he bumped into a funnel cake stand, and powdered sugar went everywhere. “{excl}!” he yelled.",
+      "Then the announcer boomed, “The pie-eating contest starts in five minutes!” The three friends signed up. {friendB} ate eleven {food} pies, {friendA} ate two, and {hero} took one bite and made a noise that sounded like “{sound}.” The judges gave him a {adj3} ribbon anyway, for bravery.",
+      "When the fireworks started, they piled onto the Ferris wheel. From the very top they could see all the way to {place}. “Best day ever,” {hero} said. Then the wheel stopped, and the three of them {verbPast} all the way home."
+    ]
+  },
+  {
+    id: "great-campout", collection: "Everyday Adventures",
+    title: "The Great Campout",
+    blurb: "One tent, one family member, one very bold raccoon. What could go wrong in the great outdoors?",
+    blanks: {
+      hero: "kidName", rel: "relative", food: "food", num: "number", silly: "sillyWord",
+      plural: "pluralNoun", adj1: "adjective", animal: "animal", color: "color", noun: "noun",
+      celeb: "celebrity", verbIng: "verbIng", sound: "sound", body: "bodyPart", adj2: "adjective",
+      verbPast: "verbPast", excl: "exclamation", adverb: "adverb", liquid: "liquid", adj3: "adjective"
+    },
+    paragraphs: [
+      "Last summer, {hero} and {rel} packed the car with a tent, two sleeping bags, and a cooler full of {food}, then drove {num} miles to Camp {silly}. The sign at the entrance said “BEWARE OF {plural}.” Nobody knew what that meant.",
+      "Setting up the tent was {adj1}. The instructions had only one picture, and it was of a {animal} wearing sunglasses. After two hours of work, the tent looked less like a tent and more like a giant {color} {noun}.",
+      "That night, {rel} built a campfire and told a spooky story about the Ghost of {celeb}, who wanders the woods {verbIng} and stealing marshmallows. Right at the scariest part, something in the bushes went “{sound}!” {hero} jumped so high that a hot marshmallow got stuck to {hero}’s {body}.",
+      "It was only a {adj2} raccoon. It grabbed the whole bag of {food} and {verbPast} off into the dark. “{excl}!” yelled {rel}, chasing after it {adverb} and then falling face-first into the lake.",
+      "Around midnight it started to rain. By morning the tent was full of {liquid}, the sleeping bags were soggy, and the raccoon was curled up on {rel}’s pillow, snoring.",
+      "On the drive home, {hero} asked, “Can we go again next weekend?” {rel} looked at the {adj3} mess in the back seat, sighed, and said, “Only if the raccoon stays home.”"
+    ]
+  }
+];
+
+/* ---- State & helpers ---- */
+const $ = id => document.getElementById(id);
+let current = null;      // active story
+let words = {};          // key -> word
+const views = ["view-shelf", "view-form", "view-story"];
+function show(view) { stopReading(); views.forEach(v => $(v).hidden = v !== view); window.scrollTo({ top: 0 }); }
+
+/* ---- Read aloud (browser speech) ---- */
+const synth = ("speechSynthesis" in window) ? window.speechSynthesis : null;
+let readState = "idle";   // idle | playing | paused
+let voices = [];
+function loadVoices() {
+  if (!synth) return;
+  const all = synth.getVoices();
+  if (!all.length) return;
+  const en = all.filter(v => /^en/i.test(v.lang));
+  voices = en.length ? en : all;
+  let saved = null; try { saved = localStorage.getItem("mml-voice"); } catch {}
+  const sel = $("voice");
+  sel.innerHTML = voices.map((v, i) => `<option value="${i}">${esc(v.name)}${v.default ? " (default)" : ""}</option>`).join("");
+  const idx = voices.findIndex(v => v.name === saved);
+  if (idx >= 0) sel.value = String(idx);
+  $("listen").hidden = false;
+}
+function setReadUI() {
+  $("btn-read").innerHTML = readState === "playing" ? "&#10074;&#10074; Pause" : readState === "paused" ? "&#9654; Resume" : "&#9654; Read it to me";
+  $("btn-stop").hidden = readState === "idle";
+}
+function clearReadingMark() { document.querySelectorAll(".story-text p.reading").forEach(p => p.classList.remove("reading")); }
+function stopReading() {
+  if (!synth) return;
+  synth.cancel(); readState = "idle"; clearReadingMark(); setReadUI();
+}
+function startReading() {
+  synth.cancel();
+  const voice = voices[Number($("voice").value)] || null;
+  const parts = [current.title, ...current.paragraphs.map(p => p.replace(/\{(\w+)\}/g, (_, k) => words[k]))];
+  const paras = [...$("story-text").querySelectorAll("p")];
+  parts.forEach((text, i) => {
+    const u = new SpeechSynthesisUtterance(text);   // one utterance per paragraph so long stories don't cut off
+    if (voice) { u.voice = voice; u.lang = voice.lang; }
+    u.rate = 0.95;
+    u.onstart = () => { clearReadingMark(); if (i > 0 && paras[i - 1]) paras[i - 1].classList.add("reading"); };
+    if (i === parts.length - 1) u.onend = () => { readState = "idle"; clearReadingMark(); setReadUI(); };
+    u.onerror = e => { if (e.error !== "interrupted" && e.error !== "canceled") { flash("Read-aloud stopped. Your browser may not allow speech here."); stopReading(); } };
+    synth.speak(u);
+  });
+  readState = "playing"; setReadUI();
+}
+function toggleReading() {
+  if (!synth) return;
+  if (readState === "idle") startReading();
+  else if (readState === "playing") { synth.pause(); readState = "paused"; setReadUI(); }
+  else { synth.resume(); readState = "playing"; setReadUI(); }
+}
+if (synth) {
+  loadVoices();
+  synth.addEventListener ? synth.addEventListener("voiceschanged", loadVoices) : (synth.onvoiceschanged = loadVoices);
+}
+const esc = s => s.replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+/* ---- Shelf ---- */
+function renderShelf() {
+  const shelf = $("view-shelf");
+  shelf.innerHTML = COLLECTIONS.map(col => {
+    const list = STORIES.filter(s => s.collection === col);
+    if (!list.length) return "";
+    return `<div class="shelf-group">
+      <h3 class="shelf-head">${esc(col)} <span>${list.length} ${list.length === 1 ? "story" : "stories"}</span></h3>
+      ${list.map((s, i) => `
+      <button class="ticket" type="button" data-id="${s.id}">
+        <span class="main">
+          <span class="eyebrow">Story ${i + 1}</span>
+          <h2>${esc(s.title)}</h2>
+          <p>${esc(s.blurb)}</p>
+        </span>
+        <span class="stub">${Object.keys(s.blanks).length}<small>blanks</small></span>
+      </button>`).join("")}
+    </div>`;
+  }).join("");
+  shelf.querySelectorAll(".ticket").forEach(b => b.addEventListener("click", () => startStory(b.dataset.id)));
+}
+
+/* ---- Form ---- */
+function startStory(id, keepWords = false) {
+  current = STORIES.find(s => s.id === id);
+  if (!keepWords) words = {};
+  $("form-eyebrow").textContent = `${Object.keys(current.blanks).length} words needed`;
+  $("form-title").textContent = current.title;
+  $("fields").innerHTML = Object.keys(current.blanks).map((key, i) => {
+    const t = TYPES[current.blanks[key]];
+    const fid = `w-${current.id}-${key}`;
+    return `<div class="field" data-key="${key}">
+      <label for="${fid}"><span class="n">${i + 1}.</span>${esc(t.label)}</label>
+      <input id="${fid}" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${esc(t.hint)}" value="${esc(words[key] || "")}">
+    </div>`;
+  }).join("");
+  $("fields").querySelectorAll("input").forEach(inp => inp.addEventListener("input", () => {
+    inp.closest(".field").classList.remove("missing"); updateProgress();
+  }));
+  $("form-error").hidden = true;
+  updateProgress();
+  show("view-form");
+  const first = $("fields").querySelector("input");
+  if (first && !keepWords) first.focus({ preventScroll: true });
+}
+function readFields() {
+  const out = {};
+  $("fields").querySelectorAll(".field").forEach(f => out[f.dataset.key] = f.querySelector("input").value.trim());
+  return out;
+}
+function updateProgress() {
+  const vals = Object.values(readFields());
+  const done = vals.filter(Boolean).length;
+  $("progress-bar").style.width = `${(done / vals.length) * 100}%`;
+  $("progress-label").textContent = `${done} of ${vals.length} filled`;
+}
+function fillRandom() {
+  const used = new Set();
+  $("fields").querySelectorAll(".field").forEach(f => {
+    const inp = f.querySelector("input");
+    if (inp.value.trim()) return;
+    const bank = TYPES[current.blanks[f.dataset.key]].bank;
+    let w = pick(bank), tries = 0;
+    while (used.has(w) && tries++ < 10) w = pick(bank);
+    used.add(w); inp.value = w; f.classList.remove("missing");
+  });
+  updateProgress();
+}
+function makeStory() {
+  const vals = readFields();
+  const missing = [...$("fields").querySelectorAll(".field")].filter(f => !vals[f.dataset.key]);
+  missing.forEach(f => f.classList.add("missing"));
+  if (missing.length) {
+    $("form-error").textContent = `Fill in ${missing.length} more ${missing.length === 1 ? "word" : "words"}, or tap “Fill with random words” for the rest.`;
+    $("form-error").hidden = false;
+    missing[0].querySelector("input").focus();
+    return;
+  }
+  words = vals;
+  renderStory();
+}
+
+/* ---- Story ---- */
+function renderStory() {
+  $("story-title").textContent = current.title;
+  $("story-text").innerHTML = current.paragraphs.map(p => {
+    const html = esc(p).replace(/\{(\w+)\}/g, (_, k) => `<span class="w" title="${esc(TYPES[current.blanks[k]].label)}">${esc(words[k] || "___")}</span>`);
+    return `<p>${html}</p>`;
+  }).join("");
+  flash("");
+  show("view-story");
+}
+function storyPlainText() {
+  return current.title + "\n\n" + current.paragraphs.map(p => p.replace(/\{(\w+)\}/g, (_, k) => words[k])).join("\n\n");
+}
+function flash(msg) { $("toast").textContent = msg; }
+
+/* ---- Text layout shared by PDF and photo ---- */
+function storyRuns(p) {
+  const out = []; let last = 0;
+  p.replace(/\{(\w+)\}/g, (m, k, i) => {
+    if (i > last) out.push({ t: p.slice(last, i), b: false });
+    out.push({ t: words[k], b: true });
+    last = i + m.length; return m;
+  });
+  if (last < p.length) out.push({ t: p.slice(last), b: false });
+  return out;
+}
+// Groups touching pieces into words (so "pickle," never splits), then wraps greedily.
+function wrapRuns(runs, maxW, measure) {
+  const groups = []; let cur = [];
+  runs.forEach(r => r.t.split(/(\s+)/).forEach(part => {
+    if (!part) return;
+    if (/^\s+$/.test(part)) { if (cur.length) { groups.push(cur); cur = []; } }
+    else cur.push({ t: part, b: r.b });
+  }));
+  if (cur.length) groups.push(cur);
+  const space = measure(" ", false);
+  const lines = []; let line = [], w = 0;
+  groups.forEach(g => {
+    const gw = g.reduce((s, x) => s + measure(x.t, x.b), 0);
+    if (line.length && w + space + gw > maxW) { lines.push(line); line = []; w = 0; }
+    if (line.length) w += space;
+    line.push(g); w += gw;
+  });
+  if (line.length) lines.push(line);
+  return lines;
+}
+
+/* ---- Saving files ---- */
+let dlPromise = null;
+function getDownloads() {
+  if (!dlPromise) dlPromise = (window.claude && window.claude.use) ? window.claude.use("downloads").catch(() => null) : Promise.resolve(null);
+  return dlPromise;
+}
+async function saveFile(name, blob) {
+  const dl = await getDownloads();
+  if (dl) {
+    try { await dl.save({ filename: name, data: blob }); return true; }
+    catch (e) {
+      const code = e && e.code;
+      if (code === "declined") flash("Save canceled.");
+      else if (code === "rate_limited") flash("A save prompt is already open. Finish that one first.");
+      else flash("Saving files isn’t available in this view.");
+      return false;
+    }
+  }
+  if (window.claude) { flash("Saving files isn’t available in this view."); return false; }
+  // Standalone page (e.g. hosted on your own site): plain browser download
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  return true;
+}
+async function busy(btn, fn) {
+  btn.disabled = true;
+  try { await fn(); } catch (e) { flash("Something went wrong making that file. Try again."); }
+  finally { btn.disabled = false; }
+}
+
+function buildPdf() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: "pt", format: "letter" });
+  const W = 612, H = 792, M = 66, maxW = W - 2 * M;
+  const RED = [215, 38, 61], INK = [30, 27, 58], TEAL = [107, 47, 179], GOLD = [252, 231, 184], MUTED = [94, 90, 125];
+  const stripes = () => {   // night-sky band: black into purple, with a moon
+    const bands = [[11, 6, 18], [26, 10, 44], [42, 15, 74], [64, 26, 110], [91, 36, 153]];
+    bands.forEach((c, i) => { doc.setFillColor(...c); doc.rect(0, i * 5, W, 5.2, "F"); });
+    doc.setFillColor(241, 232, 255); doc.circle(W - 90, 12, 7, "F");
+  };
+  stripes();
+  let y = M + 16;
+  doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(...TEAL);
+  doc.text("MIDWAY MAD LIBS", M, y); y += 30;
+  doc.setFontSize(26); doc.setTextColor(...RED);
+  const tl = doc.splitTextToSize(current.title, maxW); doc.text(tl, M, y); y += tl.length * 30 + 10;
+  const size = 13.5, lh = 22;
+  const measure = (t, b) => { doc.setFont("helvetica", b ? "bold" : "normal"); doc.setFontSize(size); return doc.getTextWidth(t); };
+  current.paragraphs.forEach(p => {
+    wrapRuns(storyRuns(p), maxW, measure).forEach(line => {
+      if (y > H - M) { doc.addPage(); stripes(); y = M + 10; }
+      let x = M;
+      line.forEach((g, gi) => {
+        if (gi) x += measure(" ", false);
+        g.forEach(pc => {
+          const w = measure(pc.t, pc.b);
+          if (pc.b) { doc.setFillColor(...GOLD); doc.rect(x - 1.5, y - size + 1.5, w + 3, size + 4, "F"); }
+          doc.setTextColor(...INK); doc.setFont("helvetica", pc.b ? "bold" : "normal"); doc.setFontSize(size);
+          doc.text(pc.t, x, y); x += w;
+        });
+      });
+      y += lh;
+    });
+    y += 12;
+  });
+  doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(...MUTED);
+  doc.text("Made with Midway Mad Libs", M, H - 34);
+  return doc.output("blob");
+}
+async function savePdf(forPrint) {
+  if (!window.jspdf) { flash("The PDF maker didn’t load. Check your connection and reload the page."); return; }
+  const ok = await saveFile(`${slug(current.title)}-mad-lib.pdf`, buildPdf());
+  if (ok) flash(forPrint ? "PDF saved. Open it and print from there." : "PDF saved.");
+}
+
+async function buildPhoto() {
+  try { await Promise.all(["56px Bungee", "700 30px 'Atkinson Hyperlegible'", "400 30px 'Atkinson Hyperlegible'"].map(f => document.fonts.load(f))); } catch {}
+  const W = 1200, CARD = 50, M = 110, maxW = W - 2 * M, size = 31, lh = 52;
+  const body = "'Atkinson Hyperlegible', 'Segoe UI', sans-serif";
+  const titleFont = "56px Bungee, Impact, sans-serif";
+  const c = document.createElement("canvas"), ctx = c.getContext("2d");
+  const measure = (t, b) => { ctx.font = `${b ? 700 : 400} ${size}px ${body}`; return ctx.measureText(t).width; };
+  const titleLines = wrapRuns([{ t: current.title, b: false }], maxW, t => { ctx.font = titleFont; return ctx.measureText(t).width; });
+  const paras = current.paragraphs.map(p => wrapRuns(storyRuns(p), maxW, measure));
+  const top = 110;
+  const textStart = top + 70 + 40 + titleLines.length * 68 + 20;
+  const textH = paras.reduce((s, l) => s + l.length * lh + 26, 0);
+  const cardBottom = textStart + textH + 70;
+  c.width = W; c.height = cardBottom + 50;
+
+  ctx.fillStyle = "#F2F4FA"; ctx.fillRect(0, 0, W, c.height);
+  const sky = ctx.createLinearGradient(0, 0, 0, 80);     // night-sky band
+  sky.addColorStop(0, "#0B0612"); sky.addColorStop(.55, "#2A0F4A"); sky.addColorStop(1, "#5B2499");
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, 80);
+  ctx.fillStyle = "#F1E8FF"; ctx.beginPath(); ctx.arc(W - 170, 36, 20, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#07030C"; ctx.beginPath(); ctx.moveTo(0, 80); ctx.lineTo(0, 66);
+  ctx.quadraticCurveTo(300, 50, 600, 64); ctx.quadraticCurveTo(900, 76, 1200, 60); ctx.lineTo(1200, 80); ctx.fill();
+  ctx.fillStyle = "#FFFFFF"; ctx.strokeStyle = "#1E1B3A"; ctx.lineWidth = 4;   // card
+  ctx.beginPath(); ctx.roundRect(CARD, top, W - 2 * CARD, cardBottom - top, 22); ctx.fill(); ctx.stroke();
+
+  let y = top + 70;
+  ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = "#6B2FB3"; ctx.font = `700 22px ${body}`; ctx.fillText("MIDWAY MAD LIBS", M, y);
+  y += 40 + 52;
+  ctx.fillStyle = "#D7263D"; ctx.font = titleFont;
+  titleLines.forEach(line => { ctx.fillText(line.map(g => g.map(p => p.t).join("")).join(" "), M, y); y += 68; });
+  y = textStart + size;
+  paras.forEach(lines => {
+    lines.forEach(line => {
+      let x = M;
+      line.forEach((g, gi) => {
+        if (gi) x += measure(" ", false);
+        g.forEach(pc => {
+          const w = measure(pc.t, pc.b);
+          if (pc.b) {
+            ctx.fillStyle = "#FCE7B8"; ctx.fillRect(x - 3, y - size + 2, w + 6, size + 8);
+            ctx.fillStyle = "#F2B33D"; ctx.fillRect(x - 3, y + 6, w + 6, 4);
+          }
+          ctx.fillStyle = "#1E1B3A"; ctx.font = `${pc.b ? 700 : 400} ${size}px ${body}`;
+          ctx.fillText(pc.t, x, y); x += w;
+        });
+      });
+      y += lh;
+    });
+    y += 26;
+  });
+  return new Promise((res, rej) => c.toBlob(b => b ? res(b) : rej(new Error("no image")), "image/png"));
+}
+async function savePhoto() {
+  const ok = await saveFile(`${slug(current.title)}-mad-lib.png`, await buildPhoto());
+  if (ok) flash("Photo saved.");
+}
+
+function printStory() {
+  if (window.self === window.top) { window.print(); return; }
+  // Inside Claude the print dialog is blocked, so print goes through the PDF.
+  return savePdf(true);
+}
+
+async function copyStory() {
+  try { await navigator.clipboard.writeText(storyPlainText()); flash("Story copied."); }
+  catch {
+    const r = document.createRange(); r.selectNodeContents($("story-text"));
+    const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    flash("Story selected. Press Ctrl+C or ⌘C to copy.");
+  }
+}
+
+/* ---- Wire up ---- */
+$("btn-make").addEventListener("click", makeStory);
+$("word-form").addEventListener("submit", e => { e.preventDefault(); makeStory(); });
+$("btn-random").addEventListener("click", fillRandom);
+$("btn-back").addEventListener("click", () => show("view-shelf"));
+$("btn-shelf").addEventListener("click", () => show("view-shelf"));
+$("btn-again").addEventListener("click", () => startStory(current.id));
+$("btn-edit").addEventListener("click", () => startStory(current.id, true));
+$("btn-copy").addEventListener("click", copyStory);
+$("btn-read").addEventListener("click", toggleReading);
+$("btn-stop").addEventListener("click", stopReading);
+$("voice").addEventListener("change", () => {
+  try { localStorage.setItem("mml-voice", voices[Number($("voice").value)].name); } catch {}
+  if (readState !== "idle") startReading();
+});
+$("btn-pdf").addEventListener("click", e => busy(e.currentTarget, () => savePdf(false)));
+$("btn-photo").addEventListener("click", e => busy(e.currentTarget, savePhoto));
+$("btn-print").addEventListener("click", e => busy(e.currentTarget, printStory));
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter" && !$("view-form").hidden && e.target.tagName === "INPUT") {
+    const inputs = [...$("fields").querySelectorAll("input")];
+    const i = inputs.indexOf(e.target);
+    e.preventDefault();
+    if (i < inputs.length - 1) inputs[i + 1].focus(); else makeStory();
+  }
+});
+renderShelf();
+show("view-shelf");
+</script>
+
+</body></html>
